@@ -21,8 +21,27 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/AlexsJones/kubeops/cmd"
+import (
+  "flag"
+  "github.com/AlexsJones/kubeops/lib/runtime"
+  "github.com/AlexsJones/kubeops/lib/subscription"
+)
+
+var (
+  context string
+)
 
 func main() {
-  cmd.Execute()
+
+  flag.StringVar(&context,"context","",
+    "Kubernetes context")
+  flag.Parse()
+
+  registry := &subscription.Registry{
+    Subscriptions: []subscription.ISubscription{
+
+    },
+  }
+
+  runtime.EventBuffer(context,registry)
 }

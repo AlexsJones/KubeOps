@@ -2,15 +2,16 @@ package runtime
 
 import (
 	"github.com/AlexsJones/kubeops/lib/kubernetes"
+	"github.com/AlexsJones/kubeops/lib/subscription"
 	"github.com/AlexsJones/kubeops/lib/watcher"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
-func EventBuffer(context string) {
+func EventBuffer(context string, registry *subscription.Registry) {
 	// ----------------------------------------------------------------------
 	start := time.Now()
-	log.Info("Starting @ %s", start.String())
+	log.Infof("Starting @ %s", start.String())
 	log.Info("Got kubernetes client...")
 
 	_, client, err := kubernetes.GetKubeClient(context)
@@ -19,19 +20,25 @@ func EventBuffer(context string) {
 	}
 	log.Info("Started event buffer...")
 	// ----------------------------------------------------------------------
-	deploymentUpdates := watcher.DeploymentChannel(client)
-
+	watchers, err := watcher.GenerateWatchers(client)
+	if err != nil {
+		log.Fatal(err)
+	}
 	for {
-		select {
-		case update, hasUpdate := <-deploymentUpdates:
-			if hasUpdate {
-				for _, i := range update.Items {
-					log.Info(i.Name)
-				}
-			}
-			break
-		}
 
+		for _, w := range watchers {
+			select {
+			case update, hasUpdate := <-w:
+				if hasUpdate {
+					registry.OnEvent(subscription.Message{
+						Event:update,
+						Client:client,
+					})
+				}
+				break
+			}
+
+		}
 		time.Sleep(time.Second)
 	}
 
