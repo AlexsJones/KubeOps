@@ -20,17 +20,19 @@ func EventBuffer(context string) {
 	log.Info("Started event buffer...")
 	// ----------------------------------------------------------------------
 	deploymentUpdates := watcher.DeploymentChannel(client)
-	select {
-		case update,hasUpdate := <- deploymentUpdates:
+
+	for {
+		select {
+		case update, hasUpdate := <-deploymentUpdates:
 			if hasUpdate {
 				for _, i := range update.Items {
 					log.Info(i.Name)
 				}
 			}
 			break
+		}
 
-	}
-	for {
 		time.Sleep(time.Second)
 	}
+
 }

@@ -13,10 +13,22 @@ import (
 
 // GetKubeClient creates a Kubernetes config and client for a given kubeconfig context.
 func GetKubeClient(context string) (*rest.Config, kubernetes.Interface, error) {
-	config, err := configForContext(context)
-	if err != nil {
-		return nil, nil, err
+
+	var config *rest.Config
+	if context == "" {
+		c, err := rest.InClusterConfig()
+		if err != nil {
+			return nil, nil, err
+		}
+		config = c
+	} else {
+		cf, err := configForContext(context)
+		if err != nil {
+			return nil, nil, err
+		}
+		config = cf
 	}
+
 	client, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not get Kubernetes client: %s", err)
