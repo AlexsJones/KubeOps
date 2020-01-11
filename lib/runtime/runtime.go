@@ -25,7 +25,6 @@ func EventBuffer(context string, registry *subscription.Registry) {
 		log.Fatal(err)
 	}
 	for {
-
 		for _, w := range watchers {
 			select {
 			case update, hasUpdate := <-w:

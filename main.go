@@ -25,6 +25,8 @@ import (
   "flag"
   "github.com/AlexsJones/kubeops/lib/runtime"
   "github.com/AlexsJones/kubeops/lib/subscription"
+  "github.com/AlexsJones/kubeops/operators"
+  log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -33,12 +35,15 @@ var (
 
 func main() {
 
+  log.SetLevel(log.DebugLevel)
+
   flag.StringVar(&context,"context","",
     "Kubernetes context")
   flag.Parse()
 
   registry := &subscription.Registry{
     Subscriptions: []subscription.ISubscription{
+      operators.ExamplePodOperator{},
 
     },
   }
