@@ -86,3 +86,56 @@ Once you've created the operator add it into the main.go
 ```
 
 That's it - now you will get filtered watch events for your type (Providing they are in the `lib/watcher` GenerateWatchers channel setup.)
+
+
+## Err can you explain in more detail...?
+
+Out of the box you get two channels registered in `lib/watcher/deployment`
+
+```go
+// ---------------------------------------------------------------------------------------
+di := client.AppsV1().Deployments("")
+wi, err := di.Watch(metav1.ListOptions{})
+if err != nil {
+	return nil, err
+}
+watchers = append(watchers,wi.ResultChan())
+// ----------------------------------------------------------------------------------------
+pi := client.CoreV1().Pods("")
+wpi, err := pi.Watch(metav1.ListOptions{})
+if err != nil {
+	return nil, err
+}
+watchers = append(watchers,wpi.ResultChan())
+// ----------------------------------------------------------------------------------------
+```
+
+These will automatically get picked up in the runtime. Add more if you like.
+
+_Anything you have registered in the watch channel you can filter for in the ISubscription_
+
+```
+type ISubscription interface {
+	OnEvent(msg Message)
+	WithFilter() interface{}
+}
+
+```
+
+The WithFilter is important as it allows the runtime to selectively send messages to your handler `OnEvent`
+You'll also get the kubernetes client interface passed through to you to act on any incoming messages.
+
+_For example_
+
+```go
+switch msg.Event.Type {
+	case watch.Added:
+        //Basic on some precondition...
+		pod := msg.Event.Object.(*v1.Pod)
+		err := msg.Client.CoreV1().Pods(pod.Namespace).Delete(pod.Name,&metav1.DeleteOptions{})
+		if err != nil {
+			log.Error(err)
+		}
+
+	}
+```

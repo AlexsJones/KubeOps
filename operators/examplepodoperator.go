@@ -20,14 +20,10 @@ func (ExamplePodOperator) OnEvent(msg subscription.Message) {
 
 	switch msg.Event.Type {
 	case watch.Added:
-		break
-	case watch.Modified:
-		break
-	case watch.Deleted:
-		break
-	case watch.Error:
-		break
-	case watch.Bookmark:
-
+		_ = msg.Event.Object.(*v1.Pod)
+		//err := msg.Client.CoreV1().Pods(pod.Namespace).Delete(pod.Name,&metav1.DeleteOptions{})
+		//if err != nil {
+		//	log.Error(err)
+		//}
 	}
 }
