@@ -1,6 +1,7 @@
 # KubeOps
 
-![spacegirl](image/SPACEGIRL_GOPHER.png)
+
+<img src="image/SPACEGIRL_GOPHER.png" data-canonical-src="image/SPACEGIRL_GOPHER.png" width="300" />
 
 - A kubernetes Operator built in go and leveraging `Kind` for speedy local development.
 - Utilises golang to express your operator requirements not some DSL or CRD system.
@@ -8,17 +9,17 @@
 ### Development perks
 
 - Uses a local registry to build a golang project then push into the k8s cluster directly
-- Example of using k8s golang API 
+- Example of using k8s golang API
 - Example of using helm
 
 ## Requirements
 
-|   |   |
-|---|---|
-| Kind  |   |
-| Golang |  |
-| Docker | |
-| Helm |  |
+|   |
+|---|
+| Kind  |   
+| Golang |  
+| Docker |
+| Helm |  
 
 
 ## Install something and get it running
@@ -59,7 +60,7 @@ Allows you to connect using the local kubeconfig to the cluster and operate exte
 
 You will see in the code `operators` defines how we filter and act on events
 
-```go 
+```go
 func (ExamplePodOperator) WithFilter() interface{} {
 
 	return &v1.Pod{}
@@ -74,7 +75,7 @@ This example struct adheres to the `ISubscription` interface.
 
 Once you've created the operator add it into the main.go
 
-```go 
+```go
 
   registry := &subscription.Registry{
     Subscriptions: []subscription.ISubscription{
