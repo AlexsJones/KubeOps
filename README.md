@@ -54,3 +54,34 @@ Allows you to connect using the local kubeconfig to the cluster and operate exte
 3. `make`
 
 4. View your changes in the cluster
+
+# Development
+
+You will see in the code `operators` defines how we filter and act on events
+
+```go 
+func (ExamplePodOperator) WithFilter() interface{} {
+
+	return &v1.Pod{}
+}
+
+func (ExamplePodOperator) OnEvent(msg subscription.Message) {
+
+	log.Debug("Pod event ----> %v", msg.Event)
+}
+```
+This example struct adheres to the `ISubscription` interface.
+
+Once you've created the operator add it into the main.go
+
+```go 
+
+  registry := &subscription.Registry{
+    Subscriptions: []subscription.ISubscription{
+      operators.ExamplePodOperator{},
+
+    },
+  }
+```
+
+That's it - now you will get filtered watch events for your type (Providing they are in the `lib/watcher` GenerateWatchers channel setup.)
