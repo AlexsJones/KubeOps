@@ -3,8 +3,9 @@ package runtime
 import (
 	"github.com/AlexsJones/kubeops/lib/kubernetes"
 	"github.com/AlexsJones/kubeops/lib/subscription"
-	"github.com/AlexsJones/kubeops/lib/watcher"
 	log "github.com/sirupsen/logrus"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/watch"
 	"time"
 )
 
@@ -20,25 +21,60 @@ func EventBuffer(context string, registry *subscription.Registry) {
 	}
 	log.Info("Started event buffer...")
 	// ----------------------------------------------------------------------
-	watchers, err := watcher.GenerateWatchers(client)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for {
-		for _, w := range watchers {
-			select {
-			case update, hasUpdate := <-w:
-				if hasUpdate {
-					registry.OnEvent(subscription.Message{
-						Event:update,
-						Client:client,
-					})
+	processChan := func(c <-chan watch.Event) {
+		select {
+		case update, hasUpdate := <-c:
+			log.Debug("Channel trigger...")
+			if hasUpdate {
+				err := registry.OnEvent(subscription.Message{
+					Event:  update,
+					Client: client,
+				})
+				if err != nil {
+					log.Error(err)
 				}
-				break
 			}
-
 		}
-		time.Sleep(time.Second)
+		log.Debug("Finished watch cycle...")
 	}
 
+	go func() {
+		pi := client.CoreV1().Pods("")
+		w, err := pi.Watch(metav1.ListOptions{Watch:true})
+		wChan := w.ResultChan()
+		if err != nil {
+			panic(err)
+		}
+		for {
+			processChan(wChan)
+		}
+	}()
+
+	go func() {
+		di := client.AppsV1().Deployments("")
+		w, err := di.Watch(metav1.ListOptions{Watch:true})
+		wChan := w.ResultChan()
+		if err != nil {
+			panic(err)
+		}
+		for {
+			processChan(wChan)
+		}
+	}()
+
+	go func() {
+		ci := client.CoreV1().ConfigMaps("")
+		w, err := ci.Watch(metav1.ListOptions{ Watch:true})
+		wChan := w.ResultChan()
+		if err != nil {
+			panic(err)
+		}
+		for {
+			processChan(wChan)
+		}
+	}()
+
+	for {
+		time.Sleep(time.Second * 2)
+	}
 }

@@ -36,6 +36,7 @@ Common labels
 */}}
 {{- define "kubeops.labels" -}}
 helm.sh/chart: {{ include "kubeops.chart" . }}
+k8s-app: kubeops
 {{ include "kubeops.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}

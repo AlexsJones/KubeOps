@@ -17,23 +17,33 @@ func (r *Registry) Add(subscription ISubscription) error {
 	return nil
 }
 
-func (r *Registry) OnEvent(msg Message) {
+func (r *Registry) OnEvent(msg Message) error {
 
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(msg.Event.Object)
 	if err != nil {
-		return
+		return err
 	}
 	newObj := reflect.New(reflect.TypeOf(msg.Event.Object).Elem()).Interface().(runtime.Object)
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredObj, newObj)
 	if err != nil {
-		return
+		return err
 	}
 
 	for _, subscription := range r.Subscriptions {
 
-		log.Debugf("Comparing subscription %v with event %v", reflect.TypeOf(subscription.WithFilter()),reflect.TypeOf(newObj))
-		if reflect.TypeOf(subscription.WithFilter()) == reflect.TypeOf(newObj) {
-			subscription.OnEvent(msg)
+		log.Debugf("Comparing subscription %v with event %v", reflect.TypeOf(subscription.WithElectedResource()),reflect.TypeOf(newObj))
+		if reflect.TypeOf(subscription.WithElectedResource()) == reflect.TypeOf(newObj) {
+
+			evts := subscription.WithEventType()
+			if len(evts) == 0 {
+				subscription.OnEvent(msg)
+			}
+			for _, evt := range evts {
+				if evt == msg.Event.Type {
+					subscription.OnEvent(msg)
+				}
+			}
 		}
 	}
+	return nil
 }
