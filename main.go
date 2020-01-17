@@ -22,7 +22,11 @@ THE SOFTWARE.
 package main
 
 import (
+  "context"
   "flag"
+  "time"
+
+  "github.com/AlexsJones/kubeops/lib/kubernetes"
   "github.com/AlexsJones/kubeops/lib/runtime"
   "github.com/AlexsJones/kubeops/lib/subscription"
   "github.com/AlexsJones/kubeops/operators"
@@ -30,23 +34,42 @@ import (
 )
 
 var (
-  context string
+  c string
 )
 
 func main() {
 
   log.SetLevel(log.DebugLevel)
 
-  flag.StringVar(&context,"context","",
+  flag.StringVar(&c,"context","",
     "Kubernetes context")
   flag.Parse()
 
   registry := &subscription.Registry{
     Subscriptions: []subscription.ISubscription{
       operators.ExamplePodOperator{},
+      operators.ExampleDeploymentOperator{},
 
     },
   }
 
-  runtime.EventBuffer(context,registry)
+  start := time.Now()
+  log.Infof("Starting @ %s", start.String())
+  log.Info("Got kubernetes client...")
+
+  _, client, err := kubernetes.GetKubeClient(c)
+  if err != nil {
+    log.Fatal(err)
+  }
+  log.Info("Started event buffer...")
+
+  ctx, _ := context.WithCancel(context.Background())
+
+
+  runtime.EventBuffer(ctx, client, registry,[]kubernetes.IObject{
+    client.CoreV1().Pods(""),
+    client.AppsV1().Deployments(""),
+    client.CoreV1().ConfigMaps(""),
+  })
+
 }

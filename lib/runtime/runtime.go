@@ -1,80 +1,70 @@
 package runtime
 
 import (
+	"context"
 	"github.com/AlexsJones/kubeops/lib/kubernetes"
 	"github.com/AlexsJones/kubeops/lib/subscription"
 	log "github.com/sirupsen/logrus"
+	"io"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
+	k "k8s.io/client-go/kubernetes"
+	"math/rand"
+	"sync"
 	"time"
 )
 
-func EventBuffer(context string, registry *subscription.Registry) {
-	// ----------------------------------------------------------------------
-	start := time.Now()
-	log.Infof("Starting @ %s", start.String())
-	log.Info("Got kubernetes client...")
+var (
+	minWatchTimeout = 5 * time.Minute
+	timeoutSeconds = int64(minWatchTimeout.Seconds() * (rand.Float64() + 1.0))
+)
 
-	_, client, err := kubernetes.GetKubeClient(context)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Info("Started event buffer...")
-	// ----------------------------------------------------------------------
-	processChan := func(c <-chan watch.Event) {
-		select {
-		case update, hasUpdate := <-c:
-			log.Debug("Channel trigger...")
-			if hasUpdate {
-				err := registry.OnEvent(subscription.Message{
-					Event:  update,
-					Client: client,
-				})
-				if err != nil {
-					log.Error(err)
-				}
+func EventBuffer(context context.Context, client k.Interface,
+	registry *subscription.Registry, obj []kubernetes.IObject) {
+	var watchers []<-chan watch.Event
+	for _, o := range obj {
+		funcObj := o
+		w, err := funcObj.Watch(metav1.ListOptions{
+			TimeoutSeconds:      &timeoutSeconds,
+			AllowWatchBookmarks: true,})
+		defer w.Stop()
+		if err != nil {
+			switch {
+			case err == io.EOF:
+				// watch closed normally
+			case err == io.ErrUnexpectedEOF:
+				log.Infof("closed with unexpected EOF")
 			}
 		}
-		log.Debug("Finished watch cycle...")
+		watchers = append(watchers, w.ResultChan())
 	}
+	log.Debugf("%+v",watchers)
 
-	go func() {
-		pi := client.CoreV1().Pods("")
-		w, err := pi.Watch(metav1.ListOptions{Watch:true})
-		wChan := w.ResultChan()
-		if err != nil {
-			panic(err)
-		}
-		for {
-			processChan(wChan)
-		}
-	}()
+	var wg sync.WaitGroup
+	wg.Add(len(watchers))
+	for x, o := range watchers {
+		go func(t int,c <-chan watch.Event) {
+			defer wg.Done()
+			counter := 0
+			for {
+				select {
+				case update, hasUpdate := <-c:
+					if hasUpdate {
+						//log.Debugf("Routine %d channel trigger has updated %d times, channel length %d", t, counter,len(c))
+						err := registry.OnEvent(subscription.Message{
+							Event:  update,
+							Client: client,
+						})
+						if err != nil {
+							log.Error(err)
+						}
 
-	go func() {
-		di := client.AppsV1().Deployments("")
-		w, err := di.Watch(metav1.ListOptions{Watch:true})
-		wChan := w.ResultChan()
-		if err != nil {
-			panic(err)
-		}
-		for {
-			processChan(wChan)
-		}
-	}()
+					}
+				}
+				counter++
+			}
 
-	go func() {
-		ci := client.CoreV1().ConfigMaps("")
-		w, err := ci.Watch(metav1.ListOptions{ Watch:true})
-		wChan := w.ResultChan()
-		if err != nil {
-			panic(err)
-		}
-		for {
-			processChan(wChan)
-		}
-	}()
-
-	for {
-		time.Sleep(time.Second * 2)
+		}(x,o)
 	}
+	wg.Wait()
 }

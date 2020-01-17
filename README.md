@@ -48,6 +48,29 @@ func (ExamplePodOperator) OnEvent(msg subscription.Message) {
 
 ```
 
+Example out of the box behaviour
+
+```go
+INFO[0000] Starting @ 2020-01-17 01:38:53.10566878 +0000 GMT m=+0.007198177 
+INFO[0000] Got kubernetes client...                     
+INFO[0000] Started event buffer...                      
+DEBU[0000] [0xc000354300 0xc000432000 0xc000042a20]     
+DEBU[0000] Incoming deployment event from prometheus-alertmanager 
+DEBU[0000] Incoming deployment event from prometheus-kube-state-metrics 
+DEBU[0000] Incoming pod event from etcd-kind-control-plane 
+DEBU[0000] Incoming pod event from prometheus-pushgateway-79f78d54cf-ssq9p 
+DEBU[0000] Incoming deployment event from grafana       
+DEBU[0000] Incoming deployment event from elasticsearch-client 
+DEBU[0000] Incoming deployment event from jaeger-jaeger-operator 
+DEBU[0000] Incoming pod event from elasticsearch-client-694f48cf8b-gsxwn 
+DEBU[0000] Incoming deployment event from coredns       
+DEBU[0000] Incoming deployment event from prometheus-pushgateway 
+DEBU[0000] Incoming deployment event from prometheus-server 
+DEBU[0000] Incoming pod event from kube-proxy-l78cr     
+DEBU[0000] Incoming pod event from kindnet-jgd9c        
+
+```
+
 ### Development perks
 
 - Uses a local registry to build a golang project then push into the k8s cluster directly
@@ -122,6 +145,22 @@ This example struct adheres to the `ISubscription` interface.
 
 Once you've created the operator add it into the main.go
 
+_Anything you have registered in the watch channel you can filter for in the ISubscription_
+
+```
+type ISubscription interface {
+	OnEvent(msg Message)
+	WithFilter() interface{}
+    WithEventType() []watch.EventType
+}   
+
+```
+
+- The WithFilter is important as it allows the runtime to selectively send messages to your handler `OnEvent`
+   You'll also get the kubernetes client interface passed through to you to act on any incoming messages.
+- The WithEvent function is important as it allows selective event types to be filtered out of the incoming operator handler.
+
+
 ```go
 
   registry := &subscription.Registry{
@@ -135,41 +174,18 @@ Once you've created the operator add it into the main.go
 That's it - now you will get filtered watch events for your type (Providing they are in the `lib/watcher` GenerateWatchers channel setup.)
 
 
-## Err can you explain in more detail...?
+## Adding watches for different Kubernetes resources
 
 Out of the box you get some channels registered in `lib/watcher/deployment`
 
 ```go
-// ---------------------------------------------------------------------------------------
-di := client.AppsV1().Deployments("")
-wi, err := di.Watch(metav1.ListOptions{})
-if err != nil {
-	return nil, err
-}
-watchers = append(watchers,wi.ResultChan())
-// ----------------------------------------------------------------------------------------
-pi := client.CoreV1().Pods("")
-wpi, err := pi.Watch(metav1.ListOptions{})
-if err != nil {
-	return nil, err
-}
-watchers = append(watchers,wpi.ResultChan())
-// ----------------------------------------------------------------------------------------
-```
-
-These will automatically get picked up in the runtime. Add more if you like.
-
-_Anything you have registered in the watch channel you can filter for in the ISubscription_
-
-```
-type ISubscription interface {
-	OnEvent(msg Message)
-	WithFilter() interface{}
-    WithEventType() []watch.EventType
-}
+//main.go
+  runtime.EventBuffer(context,client, registry,[]kubernetes.IObject{
+    client.CoreV1().Pods(""),
+    client.AppsV1().Deployments(""),
+    client.CoreV1().ConfigMaps(""),
+  })
 
 ```
 
-- The WithFilter is important as it allows the runtime to selectively send messages to your handler `OnEvent`
-   You'll also get the kubernetes client interface passed through to you to act on any incoming messages.
-- The WithEvent function is important as it allows selective event types to be filtered out of the incoming operator handler.
+These will automatically get picked up in the runtime. 

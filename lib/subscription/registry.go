@@ -1,7 +1,6 @@
 package subscription
 
 import (
-	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime"
 	"reflect"
 )
@@ -31,7 +30,7 @@ func (r *Registry) OnEvent(msg Message) error {
 
 	for _, subscription := range r.Subscriptions {
 
-		log.Debugf("Comparing subscription %v with event %v", reflect.TypeOf(subscription.WithElectedResource()),reflect.TypeOf(newObj))
+		//log.Debugf("Comparing subscription %v with event %v", reflect.TypeOf(subscription.WithElectedResource()),reflect.TypeOf(newObj))
 		if reflect.TypeOf(subscription.WithElectedResource()) == reflect.TypeOf(newObj) {
 
 			evts := subscription.WithEventType()

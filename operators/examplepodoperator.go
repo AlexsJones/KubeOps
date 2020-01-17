@@ -24,6 +24,7 @@ func (ExamplePodOperator) OnEvent(msg subscription.Message) {
 	// When we add, delete or modify the pod
 	// Then we add an example label to it.
 	pod := msg.Event.Object.(*v1.Pod)
+	log.Debugf("Incoming pod event from %s",pod.Name)
 	if pod.Labels["app.kubernetes.io/name"] == "kubeops" {
 
 		log.Debugf("%v",pod)
