@@ -11,11 +11,10 @@ down:
 	kind delete cluster --name=kind
 
 publish:
-	export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
-	kind load docker-image --name=kind kubeops
+	kind load docker-image kubeops:$(VERSION) --name=kind
 
 docker:
-	docker build -t kubeops .
+	docker build -t kubeops:$(VERSION) .
 
 install:
 	cd helm && helm install . --generate-name && cd ../
