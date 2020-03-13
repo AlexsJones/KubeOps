@@ -5,16 +5,17 @@ VERSION=`cat VERSION`
 all: docker publish install
 
 up:
-	kind create cluster --config kind/config.yaml
+	kind create cluster --name=kind
 
 down:
-	kind delete cluster
+	kind delete cluster --name=kind
 
 publish:
-	kind load docker-image kubeops:$(VERSION)
+	export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
+	kind load docker-image --name=kind kubeops
 
 docker:
-	docker build -t kubeops:$(VERSION) .
+	docker build -t kubeops .
 
 install:
 	cd helm && helm install . --generate-name && cd ../
