@@ -1,7 +1,7 @@
 <img src="image/logo_transparent.png" data-canonical-src="image/logo_transparent.png" width="300" />
 
 
-Simple programmatic Kubernetes Operator template.
+Simple programmatic Kubernetes Operator template for working with default Kubernetes resources.
 
 Use this to create your own Kubernetes operators with golang.
 
