@@ -12,23 +12,24 @@ Use this to create your own Kubernetes operators with golang.
 
 ## Run the example...
 
-### Requirements
-
-| Tooling |
-|---|
-| Kind  | 
-| Golang | 
-| Docker |
-| Helm | 
 
 Run locally:
 
 - `make up` to start a K.I.N.D cluster on Docker.
 - `go run main.go --context=~/.kube/config`
 
+<img src="image/local.gif" width="800" />
+
+
 Build docker image and install into cluster locally:
 
 - `make`
+
+<img src="image/remote.gif" width="800" />
+
+_Please see [REQUIREMENTS.md](REQUIREMENTS.md) for installation requirements_
+
+_Please see [LICENCE.md](LICENCE.md) for licence enquiries_
 
 ### Development perks
 

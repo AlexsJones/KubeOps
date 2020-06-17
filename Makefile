@@ -14,6 +14,7 @@ publish:
 	kind load docker-image kubeops:$(VERSION) --name=kind
 
 docker:
+	go mod vendor
 	docker build -t kubeops:$(VERSION) .
 
 install:
