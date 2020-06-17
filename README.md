@@ -32,6 +32,8 @@ _Please see [REQUIREMENTS.md](REQUIREMENTS.md) for installation requirements_
 
 _Please see [LICENCE.md](LICENCE.md) for licence enquiries_
 
+<img src="image/kubeops.png" width="800" />
+
 ### Development perks
 
 - A simple golang based implementation of an Operator with the boiler plate done.
