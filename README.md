@@ -18,6 +18,9 @@ Run locally:
 - `make up` to start a K.I.N.D cluster on Docker.
 - `go run main.go --context=~/.kube/config`
 
+
+_This gif is an example of running kubeops locally on the host machine and scaling some arbitrary deployment to show the watcher/subscription system_
+
 <img src="image/local.gif" width="800" />
 
 
