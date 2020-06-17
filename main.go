@@ -24,52 +24,73 @@ package main
 import (
   "context"
   "flag"
-  "time"
-
-  "github.com/AlexsJones/kubeops/lib/kubernetes"
   "github.com/AlexsJones/kubeops/lib/runtime"
   "github.com/AlexsJones/kubeops/lib/subscription"
+  "github.com/AlexsJones/kubeops/lib/watcher"
   "github.com/AlexsJones/kubeops/operators"
-  log "github.com/sirupsen/logrus"
+  "k8s.io/client-go/kubernetes"
+  "k8s.io/client-go/tools/clientcmd"
+  "k8s.io/klog"
+  examplecrdclientset "k8s.io/sample-controller/pkg/generated/clientset/versioned"
+  "time"
 )
 
 var (
-  c string
+  masterURL  string
+  kubeconfig string
 )
+
 
 func main() {
 
-  log.SetLevel(log.DebugLevel)
-
-  flag.StringVar(&c,"context","",
-    "Kubernetes context")
+  klog.InitFlags(nil)
   flag.Parse()
 
+  start := time.Now()
+  klog.Infof("Starting @ %s", start.String())
+  klog.Info("Got watcher client...")
+
+  cfg, err := clientcmd.BuildConfigFromFlags(masterURL,kubeconfig)
+  if err != nil {
+    klog.Fatalf("Error building kubeconfig: %s", err.Error())
+  }
+
+  kubeClient, err := kubernetes.NewForConfig(cfg)
+  if err != nil {
+    klog.Fatalf("Error building watcher clientset: %s", err.Error())
+  }
+
+  // This is an example of leveraging third party CRD's into your watcher/subscriptions-------------
+  exampleClient, err := examplecrdclientset.NewForConfig(cfg)
+  if err != nil {
+    klog.Fatalf("Error building example clientset: %s", err.Error())
+  }
+  // -----------------------------------------------------------------------------------------------
+  ctx, _ := context.WithCancel(context.Background())
+  // Register your subscriptions which will perform actions on an event------------------------------
   registry := &subscription.Registry{
     Subscriptions: []subscription.ISubscription{
       operators.ExamplePodOperator{},
+      operators.ExampleFooCRDOperator{},
       operators.ExampleDeploymentOperator{},
-
     },
   }
 
-  start := time.Now()
-  log.Infof("Starting @ %s", start.String())
-  log.Info("Got kubernetes client...")
+  klog.Info("Started event buffer...")
 
-  _, client, err := kubernetes.GetKubeClient(c)
-  if err != nil {
-    log.Fatal(err)
-  }
-  log.Info("Started event buffer...")
-
-  ctx, _ := context.WithCancel(context.Background())
-
-
-  runtime.EventBuffer(ctx, client, registry,[]kubernetes.IObject{
-    client.CoreV1().Pods(""),
-    client.AppsV1().Deployments(""),
-    client.CoreV1().ConfigMaps(""),
+  // Register types to watch--------------------------------------------------------------------------
+  runtime.EventBuffer(ctx, kubeClient, registry,[]watcher.IObject{
+    kubeClient.CoreV1().Pods(""),
+    kubeClient.AppsV1().Deployments(""),
+    kubeClient.CoreV1().ConfigMaps(""),
+    //Example CRD imported into the runtime-----------------------------------------------------------
+    exampleClient.SamplecontrollerV1alpha1().Foos(""),
+    // -----------------------------------------------------------------------------------------------
   })
 
+}
+
+func init() {
+  flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
+  flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 }

@@ -5,28 +5,28 @@ Simple programmatic Kubernetes Operator template.
 
 Use this to create your own Kubernetes operators with golang.
 
-- Build with KIND (Kubernetes in Docker)
+- Build with KIND (Kubernetes in Docker).
 - Express custom behaviours in code - no DSL to learn.
+- Works with built-in kubernetes resource types and custom resource definitions ( example included ).
+
+
+<img src="image/local.gif" width="800" />
 
 ## Run the example...
 
-
 Run locally:
 
+- _Please install sample-controller CRD into your cluster to observe custom resource subscriptions_
+  https://github.com/kubernetes/sample-controller
+  **It will run without this and fail to subscribe gracefully**
 - `make up` to start a K.I.N.D cluster on Docker.
-- `go run main.go --context=~/.kube/config`
-
-
-_This gif is an example of running kubeops locally on the host machine and scaling some arbitrary deployment to show the watcher/subscription system_
-
-<img src="image/local.gif" width="800" />
+- `go run main.go --kubeconfig=/Users/<name>/.kube/config`
 
 
 Build docker image and install into cluster locally:
 
 - `make`
 
-<img src="image/remote.gif" width="800" />
 
 _Please see [REQUIREMENTS.md](REQUIREMENTS.md) for installation requirements_
 

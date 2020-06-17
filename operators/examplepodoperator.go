@@ -1,10 +1,12 @@
 package operators
 
 import (
+	"context"
 	"github.com/AlexsJones/kubeops/lib/subscription"
-	log "github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/klog"
 )
 
 type ExamplePodOperator struct{}
@@ -24,10 +26,10 @@ func (ExamplePodOperator) OnEvent(msg subscription.Message) {
 	// When we add, delete or modify the pod
 	// Then we add an example label to it.
 	pod := msg.Event.Object.(*v1.Pod)
-	log.Debugf("Incoming pod event from %s",pod.Name)
-	if pod.Labels["app.kubernetes.io/name"] == "kubeops" {
+	klog.Infof("Incoming pod event from %s",pod.Name)
+	if pod.Labels["app.watcher.io/name"] == "kubeops" {
 
-		log.Debugf("%v",pod)
+		klog.Infof("%v",pod)
 		existingLabels := pod.Labels
 
 		if _, ok := existingLabels["sneaky-label"]; !ok {
@@ -36,10 +38,10 @@ func (ExamplePodOperator) OnEvent(msg subscription.Message) {
 			pod.SetLabels(existingLabels)
 			// Invoke a new pod client interface
 			pi := msg.Client.CoreV1().Pods(pod.Namespace)
-			if _, err := pi.Update(pod); err != nil {
-				log.Error(err)
+			if _, err := pi.Update(context.TODO(),pod, metav1.UpdateOptions{}); err != nil {
+				klog.Error(err)
 			}else {
-				log.Debug("Added a new label...")
+				klog.Infof("Added a new label...")
 			}
 		}
 	}

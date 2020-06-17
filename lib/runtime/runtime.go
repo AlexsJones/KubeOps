@@ -2,7 +2,7 @@ package runtime
 
 import (
 	"context"
-	"github.com/AlexsJones/kubeops/lib/kubernetes"
+	"github.com/AlexsJones/kubeops/lib/watcher"
 	"github.com/AlexsJones/kubeops/lib/subscription"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -20,11 +20,11 @@ var (
 )
 
 func EventBuffer(context context.Context, client k.Interface,
-	registry *subscription.Registry, obj []kubernetes.IObject) {
+	registry *subscription.Registry, obj []watcher.IObject) {
 	var watchers []<-chan watch.Event
 	for _, o := range obj {
 		funcObj := o
-		w, err := funcObj.Watch(metav1.ListOptions{
+		w, err := funcObj.Watch(context,metav1.ListOptions{
 			TimeoutSeconds:      &timeoutSeconds,
 			AllowWatchBookmarks: true,})
 		defer w.Stop()
