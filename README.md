@@ -1,7 +1,5 @@
-# KubeOps
+<img src="image/logo_transparent.png" data-canonical-src="image/logo_transparent.png" width="300" />
 
-
-<img src="image/SPACEGIRL_GOPHER.png" data-canonical-src="image/SPACEGIRL_GOPHER.png" width="300" />
 
 Simple programmatic Kubernetes Operator template.
 
@@ -62,3 +60,10 @@ _Please see [LICENCE.md](LICENCE.md) for licence enquiries_
 
 4. View your changes in the cluster
 
+## How does it work in a nutshell?
+
+- Kubeops uses the go-client for Kubernetes and leverages the watch capability.
+
+- The value of this project is wrapping those calls in interfaces and creating some utility functionality for cluster connection.
+
+- More information on how to develop your own operator watchers/subscriptions can be found [here](DEVELOPMENT.md).
