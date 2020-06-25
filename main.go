@@ -31,6 +31,8 @@ import (
   "k8s.io/client-go/kubernetes"
   "k8s.io/client-go/tools/clientcmd"
   "k8s.io/klog"
+  "os"
+  "os/signal"
   "time"
 )
 
@@ -59,36 +61,52 @@ func main() {
     klog.Fatalf("Error building watcher clientset: %s", err.Error())
   }
 
-  // This is an example of leveraging third party CRD's into your watcher/subscriptions-------------
-  //exampleClient, err := examplecrdclientset.NewForConfig(cfg)
-  //if err != nil {
-  //  klog.Fatalf("Error building example clientset: %s", err.Error())
-  //}
-  // -----------------------------------------------------------------------------------------------
+
   ctx, _ := context.WithCancel(context.Background())
-  // Register your subscriptions which will perform actions on an event------------------------------
-  registry := &subscription.Registry{
+
+  // Register types to watch--------------------------------------------------------------------------
+  runtime.EventBuffer(ctx, kubeClient, &subscription.Registry{
     Subscriptions: []subscription.ISubscription{
       // Subscribe to these built-in type events
       subscriptions.ExamplePodOperator{},
       subscriptions.ExampleFooCRDOperator{},
       subscriptions.ExampleDeploymentOperator{},
     },
-  }
-
-  klog.Info("Started event buffer...")
-
-  // Register types to watch--------------------------------------------------------------------------
-  runtime.EventBuffer(ctx, kubeClient, registry,[]watcher.IObject{
-
-    // Buffer events for these built-in types
+  },[]watcher.IObject{
     kubeClient.CoreV1().Pods(""),
     kubeClient.AppsV1().Deployments(""),
     kubeClient.CoreV1().ConfigMaps(""),
-    //Example CRD imported into the runtime-----------------------------------------------------------
-    //exampleClient.SamplecontrollerV1alpha1().Foos(""),
-    // -----------------------------------------------------------------------------------------------
+
   })
+
+  ctx, cancel := context.WithCancel(ctx)
+  c := make(chan os.Signal, 1)
+  signal.Notify(c, os.Interrupt)
+  defer func() {
+    signal.Stop(c)
+    cancel()
+  }()
+  go func() {
+    select {
+    case <-c:
+      cancel()
+    case <-ctx.Done():
+    }
+  }()
+
+  //This is an example of leveraging third party CRD's into your watcher/subscriptions-------------
+  //exampleClient, err := examplecrdclientset.NewForConfig(cfg)
+  //if err != nil {
+  //klog.Fatalf("Error building example clientset: %s", err.Error())
+  //}
+  //-----------------------------------------------------------------------------------------------
+  //runtime.EventBuffer(ctx, kubeClient, &subscription.Registry{
+  //  Subscriptions: []subscription.ISubscription{
+  //    subscriptions.ExampleFooCRDOperator{},
+  //  },
+  //},[]watcher.IObject{
+  //    exampleClient.SamplecontrollerV1alpha1().Foos(""),
+  //})
 
 }
 

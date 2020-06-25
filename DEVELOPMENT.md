@@ -102,3 +102,8 @@ Out of the box you get some channels registered in `lib/watcher/deployment`
 ```
 
 These will automatically get picked up in the runtime. 
+
+
+## Custom Resource Definitions with Kubebuilder
+
+https://book.kubebuilder.io/quick-start.html#create-a-project

@@ -1,8 +1,10 @@
-## Suggested requirements
+## Requirements
 - helm 
     - v3.0
 - kind 
     - v0.6.1 go1.13.4 darwin/amd64
+- kubebuilder
+- kustomize
 - go
     - go1.14.3 darwin/amd64
 - kubectl 

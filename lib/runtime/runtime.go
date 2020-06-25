@@ -50,7 +50,6 @@ func EventBuffer(context context.Context, client k.Interface,
 				select {
 				case update, hasUpdate := <-c:
 					if hasUpdate {
-						//log.Debugf("Routine %d channel trigger has updated %d times, channel length %d", t, counter,len(c))
 						err := registry.OnEvent(subscription.Message{
 							Event:  update,
 							Client: client,

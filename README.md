@@ -9,6 +9,7 @@ Use this to create your own Kubernetes operators with golang.
 - Express custom behaviours in code - no DSL to learn.
 - Generate your CRD's with controller-runtime and import them here.
 - Works with built-in kubernetes resource types and custom resource definitions ( example included ).
+- Works with Kubebuilder to write your own custom resource definitions, install them and operate with them.
 
 
 <img src="image/local.gif" width="800" />
