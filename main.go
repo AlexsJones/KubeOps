@@ -27,11 +27,10 @@ import (
   "github.com/AlexsJones/kubeops/lib/runtime"
   "github.com/AlexsJones/kubeops/lib/subscription"
   "github.com/AlexsJones/kubeops/lib/watcher"
-  "github.com/AlexsJones/kubeops/operators"
+  "github.com/AlexsJones/kubeops/subscriptions"
   "k8s.io/client-go/kubernetes"
   "k8s.io/client-go/tools/clientcmd"
   "k8s.io/klog"
-  examplecrdclientset "k8s.io/sample-controller/pkg/generated/clientset/versioned"
   "time"
 )
 
@@ -61,18 +60,19 @@ func main() {
   }
 
   // This is an example of leveraging third party CRD's into your watcher/subscriptions-------------
-  exampleClient, err := examplecrdclientset.NewForConfig(cfg)
-  if err != nil {
-    klog.Fatalf("Error building example clientset: %s", err.Error())
-  }
+  //exampleClient, err := examplecrdclientset.NewForConfig(cfg)
+  //if err != nil {
+  //  klog.Fatalf("Error building example clientset: %s", err.Error())
+  //}
   // -----------------------------------------------------------------------------------------------
   ctx, _ := context.WithCancel(context.Background())
   // Register your subscriptions which will perform actions on an event------------------------------
   registry := &subscription.Registry{
     Subscriptions: []subscription.ISubscription{
-      operators.ExamplePodOperator{},
-      operators.ExampleFooCRDOperator{},
-      operators.ExampleDeploymentOperator{},
+      // Subscribe to these built-in type events
+      subscriptions.ExamplePodOperator{},
+      subscriptions.ExampleFooCRDOperator{},
+      subscriptions.ExampleDeploymentOperator{},
     },
   }
 
@@ -80,11 +80,13 @@ func main() {
 
   // Register types to watch--------------------------------------------------------------------------
   runtime.EventBuffer(ctx, kubeClient, registry,[]watcher.IObject{
+
+    // Buffer events for these built-in types
     kubeClient.CoreV1().Pods(""),
     kubeClient.AppsV1().Deployments(""),
     kubeClient.CoreV1().ConfigMaps(""),
     //Example CRD imported into the runtime-----------------------------------------------------------
-    exampleClient.SamplecontrollerV1alpha1().Foos(""),
+    //exampleClient.SamplecontrollerV1alpha1().Foos(""),
     // -----------------------------------------------------------------------------------------------
   })
 

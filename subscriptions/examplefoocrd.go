@@ -1,4 +1,4 @@
-package operators
+package subscriptions
 
 import (
 	"github.com/AlexsJones/kubeops/lib/subscription"

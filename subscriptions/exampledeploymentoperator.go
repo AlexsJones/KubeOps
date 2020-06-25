@@ -1,4 +1,4 @@
-package operators
+package subscriptions
 
 import (
 	"github.com/AlexsJones/kubeops/lib/subscription"
@@ -25,4 +25,5 @@ func (ExampleDeploymentOperator) OnEvent(msg subscription.Message) {
 
 	klog.Infof("Deployment %s has %d Available replicas",d.Name,d.Status.AvailableReplicas)
 
+	
 }
