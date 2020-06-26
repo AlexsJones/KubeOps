@@ -61,7 +61,7 @@ func main() {
 		klog.Fatalf("Error building watcher clientset: %s", err.Error())
 	}
 
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(context.Background())
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	defer func() {
