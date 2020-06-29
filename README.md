@@ -19,7 +19,7 @@ Use this to create your own Kubernetes operators with golang.
 Run builtin examples locally:
 
 - `make up` to start a K.I.N.D cluster on Docker.
-- `go run main.go --kubeconfig=/Users/<name>/.kube/config`
+- `make run-builtin-example`
 
 This creates some resource interfaces and subscribes to them with some basic subscriptions `./subscriptions`
 
@@ -76,6 +76,8 @@ _Please see [LICENCE.md](LICENCE.md) for licence enquiries_
 |   |   |
 |---|---|
 | make up  | Creates a kind cluster   |
+| make run-builtin-example | Runs the ./examples/builtin/main.go |
+| make run-crd-example | Runs the ./examples/crd/main.go |
 | make down | Deletes the kind cluster  |
 | make | Builds the project, dockerfile, side loads then installs into the cluster |
 | make delete | Deletes all currently installed helm releases  |

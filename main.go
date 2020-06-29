@@ -27,7 +27,6 @@ import (
   "github.com/AlexsJones/kubeops/lib/runtime"
   "github.com/AlexsJones/kubeops/lib/subscription"
   "github.com/AlexsJones/kubeops/lib/watcher"
-  "github.com/AlexsJones/kubeops/subscriptions"
   "k8s.io/client-go/kubernetes"
   "k8s.io/client-go/tools/clientcmd"
   "k8s.io/klog"
@@ -61,25 +60,7 @@ func main() {
     klog.Fatalf("Error building watcher clientset: %s", err.Error())
   }
 
-
-  ctx, _ := context.WithCancel(context.Background())
-
-  // Register types to watch--------------------------------------------------------------------------
-  runtime.EventBuffer(ctx, kubeClient, &subscription.Registry{
-    Subscriptions: []subscription.ISubscription{
-      // Subscribe to these built-in type events
-      subscriptions.ExamplePodOperator{},
-      subscriptions.ExampleFooCRDOperator{},
-      subscriptions.ExampleDeploymentOperator{},
-    },
-  },[]watcher.IObject{
-    kubeClient.CoreV1().Pods(""),
-    kubeClient.AppsV1().Deployments(""),
-    kubeClient.CoreV1().ConfigMaps(""),
-
-  })
-
-  ctx, cancel := context.WithCancel(ctx)
+  ctx, cancel := context.WithCancel(context.Background())
   c := make(chan os.Signal, 1)
   signal.Notify(c, os.Interrupt)
   defer func() {
@@ -94,19 +75,17 @@ func main() {
     }
   }()
 
-  //This is an example of leveraging third party CRD's into your watcher/subscriptions-------------
-  //exampleClient, err := examplecrdclientset.NewForConfig(cfg)
-  //if err != nil {
-  //klog.Fatalf("Error building example clientset: %s", err.Error())
-  //}
-  //-----------------------------------------------------------------------------------------------
-  //runtime.EventBuffer(ctx, kubeClient, &subscription.Registry{
-  //  Subscriptions: []subscription.ISubscription{
-  //    subscriptions.ExampleFooCRDOperator{},
-  //  },
-  //},[]watcher.IObject{
-  //    exampleClient.SamplecontrollerV1alpha1().Foos(""),
-  //})
+  /*
+  This is a default template file.
+  Add subscriptions and watchers to make it your own.
+   */
+  runtime.EventBuffer(ctx, kubeClient, &subscription.Registry{
+    Subscriptions: []subscription.ISubscription{
+
+    },
+  },[]watcher.IObject{
+
+  })
 
 }
 
