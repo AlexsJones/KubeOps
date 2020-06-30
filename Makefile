@@ -2,7 +2,7 @@ VERSION=`cat VERSION`
 .PHONY: publish docker install up down
 
 rename: 
-	gofmt -w -l -r "github.com/AlexsJones/kubeops -> $1" .
+	gomove github.com/AlexsJones/kubeops $(NAME)
 
 all: docker publish install
 
