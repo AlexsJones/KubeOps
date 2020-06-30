@@ -12,8 +12,6 @@ Use this to create your own Kubernetes operators with golang.
 - Works with Kubebuilder to write your own custom resource definitions, install them and operate with them.
 
 
-<img src="image/local.gif" width="800" />
-
 ## Run the example...
 
 Run builtin examples locally:
