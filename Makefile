@@ -1,6 +1,9 @@
 VERSION=`cat VERSION`
 .PHONY: publish docker install up down
 
+rename: 
+	gofmt -w -l -r "github.com/AlexsJones/kubeops -> $1" .
+
 all: docker publish install
 
 run-builtin-example:
