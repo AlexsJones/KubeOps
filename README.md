@@ -100,3 +100,8 @@ _Please see [LICENCE.md](LICENCE.md) for licence enquiries_
 - The value of this project is wrapping those calls in interfaces and creating some utility functionality for cluster connection.
 
 - More information on how to develop your own operator watchers/subscriptions can be found [here](DEVELOPMENT.md).
+
+## Template this project
+
+- `NAME=github.com/yourname/project make rename`
+- Update the module name in `go.mod`
