@@ -7,10 +7,10 @@ rename:
 all: docker publish install
 
 run-builtin-example:
-	go run examples/builtin/main.go --kubeconfig=$HOME/.kube/config
+	go run examples/builtin/main.go --kubeconfig=$(HOME)/.kube/config
 
 run-crd-example:
-	go run examples/crd/main.go --kubeconfig=$HOME/.kube/config
+	go run examples/crd/main.go --kubeconfig=$(HOME)/.kube/config
 
 up:
 	kind create cluster --name=kind
