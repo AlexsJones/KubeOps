@@ -12,8 +12,15 @@ Use this to create your own Kubernetes operators with golang.
 - Works with Kubebuilder to write your own custom resource definitions, install them and operate with them.
 - [SlackAlerter](https://github.com/AlexsJones/slackalerter) is a complete example using this template.
 
+## Use this project template
+- Click the `Use this template` button.
+- Open your new repo...
+- `NAME=github.com/yourname/project make rename`
+- Update the module name in `go.mod`
+- Voila 💅🏼
 
-## Run the example...
+
+## Run the example... 🥰
 
 Run builtin examples locally:
 
@@ -94,7 +101,7 @@ _Please see [LICENCE.md](LICENCE.md) for licence enquiries_
 
 5. If you like it, push the docker image with the kubeops image and use the helm chart to install it `cd helm && helm install . --generate-name`
 
-## How does it work in a nutshell?
+## How does it work in a nutshell? 🐣
 
 - Kubeops uses the go-client for Kubernetes and leverages the watch capability.
 
@@ -102,7 +109,3 @@ _Please see [LICENCE.md](LICENCE.md) for licence enquiries_
 
 - More information on how to develop your own operator watchers/subscriptions can be found [here](DEVELOPMENT.md).
 
-## Template this project
-
-- `NAME=github.com/yourname/project make rename`
-- Update the module name in `go.mod`
