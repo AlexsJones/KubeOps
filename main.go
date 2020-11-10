@@ -22,74 +22,80 @@ THE SOFTWARE.
 package main
 
 import (
-  "context"
-  "flag"
-  "github.com/AlexsJones/kubeops/lib/runtime"
-  "github.com/AlexsJones/kubeops/lib/subscription"
-  "github.com/AlexsJones/kubeops/lib/watcher"
-  "k8s.io/client-go/kubernetes"
-  "k8s.io/client-go/tools/clientcmd"
-  "k8s.io/klog"
-  "os"
-  "os/signal"
-  "time"
+	"context"
+	"flag"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+
+	"github.com/AlexsJones/kubeops/lib/runtime"
+	"github.com/AlexsJones/kubeops/lib/subscription"
+	"github.com/AlexsJones/kubeops/lib/watcher"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/klog"
 )
 
 var (
-  masterURL  string
-  kubeconfig string
+	masterURL  string
+	kubeconfig string
+	addr       = flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
 )
-
 
 func main() {
 
-  klog.InitFlags(nil)
-  flag.Parse()
+	klog.InitFlags(nil)
+	flag.Parse()
 
-  start := time.Now()
-  klog.Infof("Starting @ %s", start.String())
-  klog.Info("Got watcher client...")
+	start := time.Now()
+	klog.Infof("Starting @ %s", start.String())
 
-  cfg, err := clientcmd.BuildConfigFromFlags(masterURL,kubeconfig)
-  if err != nil {
-    klog.Fatalf("Error building kubeconfig: %s", err.Error())
-  }
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		log.Fatal(http.ListenAndServe(*addr, nil))
+	}()
 
-  kubeClient, err := kubernetes.NewForConfig(cfg)
-  if err != nil {
-    klog.Fatalf("Error building watcher clientset: %s", err.Error())
-  }
+	klog.Info("Got watcher client...")
 
-  ctx, cancel := context.WithCancel(context.Background())
-  c := make(chan os.Signal, 1)
-  signal.Notify(c, os.Interrupt)
-  defer func() {
-    signal.Stop(c)
-    cancel()
-  }()
-  go func() {
-    select {
-    case <-c:
-      cancel()
-    case <-ctx.Done():
-    }
-  }()
+	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
+	if err != nil {
+		klog.Fatalf("Error building kubeconfig: %s", err.Error())
+	}
 
-  /*
-  This is a default template file.
-  Add subscriptions and watchers to make it your own.
-   */
-  runtime.EventBuffer(ctx, kubeClient, &subscription.Registry{
-    Subscriptions: []subscription.ISubscription{
+	kubeClient, err := kubernetes.NewForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("Error building watcher clientset: %s", err.Error())
+	}
 
-    },
-  },[]watcher.IObject{
+	ctx, cancel := context.WithCancel(context.Background())
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	defer func() {
+		signal.Stop(c)
+		cancel()
+	}()
+	go func() {
+		select {
+		case <-c:
+			cancel()
+		case <-ctx.Done():
+		}
+	}()
 
-  })
+	/*
+		This is a default template file.
+		Add subscriptions and watchers to make it your own.
+	*/
+	runtime.EventBuffer(ctx, kubeClient, &subscription.Registry{
+		Subscriptions: []subscription.ISubscription{},
+	}, []watcher.IObject{})
 
 }
 
 func init() {
-  flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
-  flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
+	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 }

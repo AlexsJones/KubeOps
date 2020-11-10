@@ -2,21 +2,23 @@ package runtime
 
 import (
 	"context"
-	"github.com/AlexsJones/kubeops/lib/watcher"
-	"github.com/AlexsJones/kubeops/lib/subscription"
-	log "github.com/sirupsen/logrus"
 	"io"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/watch"
-	k "k8s.io/client-go/kubernetes"
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/AlexsJones/KubeOps/lib/metrics"
+	"github.com/AlexsJones/kubeops/lib/subscription"
+	"github.com/AlexsJones/kubeops/lib/watcher"
+	log "github.com/sirupsen/logrus"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/watch"
+	k "k8s.io/client-go/kubernetes"
 )
 
 var (
 	minWatchTimeout = 5 * time.Minute
-	timeoutSeconds = int64(minWatchTimeout.Seconds() * (rand.Float64() + 1.0))
+	timeoutSeconds  = int64(minWatchTimeout.Seconds() * (rand.Float64() + 1.0))
 )
 
 func EventBuffer(context context.Context, client k.Interface,
@@ -24,9 +26,9 @@ func EventBuffer(context context.Context, client k.Interface,
 	var watchers []<-chan watch.Event
 	for _, o := range obj {
 		funcObj := o
-		w, err := funcObj.Watch(context,metav1.ListOptions{
+		w, err := funcObj.Watch(context, metav1.ListOptions{
 			TimeoutSeconds:      &timeoutSeconds,
-			AllowWatchBookmarks: true,})
+			AllowWatchBookmarks: true})
 		defer w.Stop()
 		if err != nil {
 			switch {
@@ -38,12 +40,12 @@ func EventBuffer(context context.Context, client k.Interface,
 		}
 		watchers = append(watchers, w.ResultChan())
 	}
-	log.Debugf("%+v",watchers)
+	log.Debugf("%+v", watchers)
 
 	var wg sync.WaitGroup
 	wg.Add(len(watchers))
 	for x, o := range watchers {
-		go func(t int,c <-chan watch.Event) {
+		go func(t int, c <-chan watch.Event) {
 			defer wg.Done()
 			counter := 0
 			for {
@@ -57,13 +59,13 @@ func EventBuffer(context context.Context, client k.Interface,
 						if err != nil {
 							log.Error(err)
 						}
-
+						metrics.TotalEventOps.Inc()
 					}
 				}
 				counter++
 			}
 
-		}(x,o)
+		}(x, o)
 	}
 	wg.Wait()
 }
