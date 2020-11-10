@@ -2,14 +2,15 @@ package runtime
 
 import (
 	"context"
+	"errors"
 	"io"
 	"math/rand"
 	"sync"
 	"time"
 
 	"github.com/AlexsJones/KubeOps/lib/metrics"
-	"github.com/AlexsJones/kubeops/lib/subscription"
-	"github.com/AlexsJones/kubeops/lib/watcher"
+	"github.com/AlexsJones/KubeOps/lib/subscription"
+	"github.com/AlexsJones/KubeOps/lib/watcher"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
@@ -22,7 +23,11 @@ var (
 )
 
 func EventBuffer(context context.Context, client k.Interface,
-	registry *subscription.Registry, obj []watcher.IObject) {
+	registry *subscription.Registry, obj []watcher.IObject) error {
+
+	if len(obj) == 0 {
+		return errors.New("no watchers selected, exiting.")
+	}
 	var watchers []<-chan watch.Event
 	for _, o := range obj {
 		funcObj := o
@@ -45,7 +50,7 @@ func EventBuffer(context context.Context, client k.Interface,
 	var wg sync.WaitGroup
 	wg.Add(len(watchers))
 	for x, o := range watchers {
-		go func(t int, c <-chan watch.Event) {
+		go func(t int, c <-chan watch.Event) error {
 			defer wg.Done()
 			counter := 0
 			for {
@@ -57,7 +62,7 @@ func EventBuffer(context context.Context, client k.Interface,
 							Client: client,
 						})
 						if err != nil {
-							log.Error(err)
+							return err
 						}
 						metrics.TotalEventOps.Inc()
 					}
@@ -68,4 +73,6 @@ func EventBuffer(context context.Context, client k.Interface,
 		}(x, o)
 	}
 	wg.Wait()
+
+	return nil
 }

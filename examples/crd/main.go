@@ -24,10 +24,10 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/AlexsJones/kubeops/lib/runtime"
-	"github.com/AlexsJones/kubeops/lib/subscription"
-	"github.com/AlexsJones/kubeops/lib/watcher"
-	"github.com/AlexsJones/kubeops/subscriptions"
+	"github.com/AlexsJones/KubeOps/lib/runtime"
+	"github.com/AlexsJones/KubeOps/lib/subscription"
+	"github.com/AlexsJones/KubeOps/lib/watcher"
+	"github.com/AlexsJones/KubeOps/subscriptions"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
@@ -83,7 +83,7 @@ func main() {
 	klog.Fatalf("Error building example clientset: %s", err.Error())
 	}
 
-	runtime.EventBuffer(ctx, kubeClient, &subscription.Registry{
+	err = runtime.EventBuffer(ctx, kubeClient, &subscription.Registry{
 		Subscriptions: []subscription.ISubscription{
 			subscriptions.ExampleFooCRDOperator{},
 		},
@@ -91,6 +91,9 @@ func main() {
 		exampleClient.SamplecontrollerV1alpha1().Foos(""),
 
 	})
+	if err != nil {
+		klog.Error(err)
+	}
 }
 
 func init() {

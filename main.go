@@ -30,9 +30,9 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/AlexsJones/kubeops/lib/runtime"
-	"github.com/AlexsJones/kubeops/lib/subscription"
-	"github.com/AlexsJones/kubeops/lib/watcher"
+	"github.com/AlexsJones/KubeOps/lib/runtime"
+	"github.com/AlexsJones/KubeOps/lib/subscription"
+	"github.com/AlexsJones/KubeOps/lib/watcher"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -65,10 +65,14 @@ func main() {
 		klog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
+	klog.Info("Built config from flags...")
+
 	kubeClient, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
 		klog.Fatalf("Error building watcher clientset: %s", err.Error())
 	}
+
+	klog.Info("Created new KubeConfig")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	c := make(chan os.Signal, 1)
@@ -80,22 +84,29 @@ func main() {
 	go func() {
 		select {
 		case <-c:
-			cancel()
 		case <-ctx.Done():
+			cancel()
 		}
 	}()
 
+	klog.Info("Starting event buffer...")
 	/*
 		This is a default template file.
 		Add subscriptions and watchers to make it your own.
 	*/
-	runtime.EventBuffer(ctx, kubeClient, &subscription.Registry{
-		Subscriptions: []subscription.ISubscription{},
-	}, []watcher.IObject{})
-
+	err = runtime.EventBuffer(ctx, kubeClient,
+		&subscription.Registry{
+			Subscriptions: []subscription.ISubscription{},
+		}, []watcher.IObject{
+			kubeClient.CoreV1().Pods(""),
+		})
+	if err != nil {
+		klog.Error(err)
+	}
 }
 
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+
 }

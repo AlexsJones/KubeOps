@@ -1,10 +1,10 @@
 VERSION=`cat VERSION`
 .PHONY: publish docker install up down
 
-rename: 
-	gomove github.com/AlexsJones/kubeops $(NAME)
 
 all: docker publish install
+rename: 
+	gomove github.com/AlexsJones/kubeops $(NAME)
 
 run-builtin-example:
 	go run examples/builtin/main.go --kubeconfig=$(HOME)/.kube/config
