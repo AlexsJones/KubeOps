@@ -1,8 +1,8 @@
 VERSION=`cat VERSION`
-.PHONY: publish docker install up down
-
+.PHONY: publish docker install up down all test clean
 
 all: docker publish install
+
 rename: 
 	gomove github.com/AlexsJones/kubeops $(NAME)
 
