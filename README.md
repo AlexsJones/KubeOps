@@ -131,3 +131,6 @@ _Please see [LICENCE.md](LICENCE.md) for licence enquiries_
 
 - More information on how to develop your own operator watchers/subscriptions can be found [here](DEVELOPMENT.md).
 
+## What about Custom Resource Definitions?
+
+Currently the solution would be to use kubebuilder to generate CRD's and then import them either as a library or subproject into KubeOps template.
