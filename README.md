@@ -29,6 +29,28 @@ Run builtin examples locally:
 
 This creates some resource interfaces and subscribes to them with some basic subscriptions `./subscriptions`
 
+```
+go run examples/builtin/main.go --kubeconfig=/Users/jonesax/.kube/config
+I1111 16:03:11.903734   59945 main.go:51] Starting @ 2020-11-11 16:03:11.903596 +0000 GMT m=+0.008013710
+I1111 16:03:11.903757   59945 main.go:52] Got watcher client...
+I1111 16:03:11.944279   59945 exampledeploymentoperator.go:26] Deployment coredns has 2 Available replicas
+I1111 16:03:11.945451   59945 examplepodoperator.go:29] Incoming pod event from kube-apiserver-kind-control-plane
+I1111 16:03:11.946563   59945 exampledeploymentoperator.go:26] Deployment local-path-provisioner has 1 Available replicas
+I1111 16:03:11.946968   59945 exampledeploymentoperator.go:26] Deployment chart-1605110531-kubeops has 1 Available replicas
+I1111 16:03:11.947272   59945 exampledeploymentoperator.go:26] Deployment chart-1605044953-kubeops has 1 Available replicas
+I1111 16:03:11.947625   59945 examplepodoperator.go:29] Incoming pod event from kindnet-dmqg9
+I1111 16:03:11.948102   59945 examplepodoperator.go:29] Incoming pod event from kube-proxy-qvqpm
+I1111 16:03:11.948603   59945 examplepodoperator.go:29] Incoming pod event from coredns-f9fd979d6-2472d
+I1111 16:03:11.948863   59945 examplepodoperator.go:29] Incoming pod event from chart-1605110531-kubeops-6957c9d5df-glhxf
+I1111 16:03:11.950408   59945 examplepodoperator.go:29] Incoming pod event from coredns-f9fd979d6-vfcd7
+I1111 16:03:11.950854   59945 examplepodoperator.go:29] Incoming pod event from chart-1605044953-kubeops-9645784f5-l6xlc
+I1111 16:03:11.951771   59945 examplepodoperator.go:29] Incoming pod event from etcd-kind-control-plane
+I1111 16:03:11.952974   59945 examplepodoperator.go:29] Incoming pod event from kube-scheduler-kind-control-plane
+I1111 16:03:11.953784   59945 examplepodoperator.go:29] Incoming pod event from kube-controller-manager-kind-control-plane
+I1111 16:03:11.954150   59945 examplepodoperator.go:29] Incoming pod event from local-path-provisioner-78776bfc44-skrmb
+```
+
+
 _Resources to watch_
 
 ```go
