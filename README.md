@@ -1,6 +1,6 @@
 <img src="image/logo_transparent.png" data-canonical-src="image/logo_transparent.png" width="300" />
 
-### This project is now homed with the CloudNative Skunkworks [here](https://github.com/cloud-native-skunkworks/KubeOps) this repository will maintain a mirror.
+### This project is now located within the CloudNative Skunkworks [here](https://github.com/cloud-native-skunkworks/KubeOps) this repository will maintain a mirror.
 
 
 A simple programmatic Kubernetes Operator template.
