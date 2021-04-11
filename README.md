@@ -15,9 +15,6 @@ Use this to create your own Kubernetes operators with golang.
 ## Use this project template
 - Click the `Use this template` button.
 - Open your new repo...
--  `go get -u github.com/ksubedi/gomove` ( Remember to have your $GOPATH and bin on the $PATH )
-- `NAME=github.com/yourname/project make rename`
-- Update the module name in `go.mod`
 - Voila 💅🏼
 
 

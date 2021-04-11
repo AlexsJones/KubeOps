@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/AlexsJones/KubeOps/lib/metrics"
-	"github.com/AlexsJones/KubeOps/lib/subscription"
-	"github.com/AlexsJones/KubeOps/lib/watcher"
+	"KubeOps/app/lib/metrics"
+	"KubeOps/app/lib/subscription"
+	"KubeOps/app/lib/watcher"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"

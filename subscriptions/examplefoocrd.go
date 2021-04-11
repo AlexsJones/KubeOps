@@ -1,7 +1,7 @@
 package subscriptions
 
 import (
-	"github.com/AlexsJones/KubeOps/lib/subscription"
+	"KubeOps/app/lib/subscription"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/klog"
 	// In this example we have imported the CRD type from the Kubernetes sample-controller project

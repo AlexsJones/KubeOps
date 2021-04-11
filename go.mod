@@ -1,4 +1,4 @@
-module github.com/AlexsJones/KubeOps
+module KubeOps/app
 
 go 1.15
 

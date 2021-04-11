@@ -22,12 +22,12 @@ THE SOFTWARE.
 package main
 
 import (
+	"KubeOps/app/lib/runtime"
+	"KubeOps/app/lib/subscription"
+	"KubeOps/app/lib/watcher"
+	"KubeOps/app/subscriptions"
 	"context"
 	"flag"
-	"github.com/AlexsJones/KubeOps/lib/runtime"
-	"github.com/AlexsJones/KubeOps/lib/subscription"
-	"github.com/AlexsJones/KubeOps/lib/watcher"
-	"github.com/AlexsJones/KubeOps/subscriptions"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
