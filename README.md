@@ -1,4 +1,4 @@
-[![ohmyyaml](./images/operator.png)](https://youtu.be/08O9eLJGQRM "Operators")
+[![ohmyyaml](./image/operator.png)](https://youtu.be/08O9eLJGQRM "Operators")
 
 ### This project is now located within the CloudNative Skunkworks [here](https://github.com/cloud-native-skunkworks/KubeOps) this repository will maintain a mirror.
 
