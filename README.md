@@ -1,8 +1,5 @@
 [![ohmyyaml](./image/operator.png)](https://youtu.be/08O9eLJGQRM "Operators")
 
-### This project is now located within the CloudNative Skunkworks [here](https://github.com/cloud-native-skunkworks/KubeOps) this repository will maintain a mirror.
-
-
 A simple programmatic Kubernetes Operator template.
 
 Use this to create your own Kubernetes operators with golang.
